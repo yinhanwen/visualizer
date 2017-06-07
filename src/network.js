@@ -29,6 +29,7 @@ function start(conn) {
     'ProxyManager',
     'TimeHandler',
     'ViewPort',
+    'VtkImageDelivery',
     'VtkGeometryDelivery',
   ], customProtocols);
 
