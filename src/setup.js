@@ -1,6 +1,15 @@
+import macro from 'vtk.js/Sources/macro';
+import vtkURLExtract from 'vtk.js/Sources/Common/Core/URLExtract';
+
 import { getActiveStore, dispatch, actions } from './redux';
 import behaviorOnChange from './behavior';
 import stateAccessor from './redux/selectors/stateAccessor';
+
+const serverColorMaps = vtkURLExtract.extractURLParameters().serverColorMaps;
+
+const resetProgress = macro.debounce(() => {
+  dispatch(actions.network.resetProgress());
+}, 1000);
 
 export default function setup(session) {
   // Keep track of any server notification
@@ -16,6 +25,10 @@ export default function setup(session) {
       }
     });
   });
+  session.subscribe('paraview.progress', (args) => {
+    dispatch(actions.network.updateProgress(args[0]));
+    resetProgress();
+  });
 
   // Fetch data
   dispatch(actions.proxies.fetchPipeline());
@@ -26,7 +39,7 @@ export default function setup(session) {
 
   // Fetch heavy data after full initialization
   setTimeout(() => {
-    dispatch(actions.colors.fetchColorMapImages());
+    dispatch(actions.colors.fetchColorMapImages(512, !serverColorMaps));
   }, 2000);
 
   // Attach default behavior
